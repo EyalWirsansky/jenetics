@@ -50,6 +50,26 @@ dependencyResolutionManagement {
 
 rootProject.name = "jenetics"
 
+plugins {
+    id("com.gradle.enterprise") version("3.10.3")
+    id("com.gradle.common-custom-user-data-gradle-plugin") version("1.7.2")
+}
+
+gradleEnterprise {
+    server = "http://ec2-3-238-226-24.compute-1.amazonaws.com"
+    allowUntrustedServer = true
+
+    buildScan {
+        publishAlways()
+
+        capture {
+          isTaskInputFiles = true
+        }
+
+        isUploadInBackground = true
+	}
+}
+
 // The Jenetics modules.
 include("jenetics")
 include("jenetics.doc")
