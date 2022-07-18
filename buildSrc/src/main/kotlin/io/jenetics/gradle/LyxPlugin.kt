@@ -20,11 +20,14 @@
 package io.jenetics.gradle
 
 import Env
+import Env.BUILD_DATE
 import Jenetics
 import org.apache.tools.ant.filters.ReplaceTokens
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.tasks.Copy
+import org.gradle.internal.impldep.org.junit.experimental.categories.Categories.CategoryFilter.include
 import org.gradle.kotlin.dsl.filter
 import org.gradle.kotlin.dsl.register
 import java.time.LocalDate
@@ -47,30 +50,29 @@ open class LyxPlugin : Plugin<Project> {
 		}
 		build.dependsOn(LYX)
 
-		project.tasks.register(PREPARE_PDF_GENERATION) {
-			doLast {
-				project.copy {
-					from("${project.projectDir}/src/main") {
-						include("lyx/manual.lyx")
-					}
 
-					into(build.temporaryDir)
-					filter(
-						ReplaceTokens::class, "tokens" to mapOf(
-							"__version__" to project.version,
-							"__minor_version__" to Version.parse(project.version).minorVersionString(),
-							"__identifier__" to "${Jenetics.VERSION}-$BUILD_DATE",
-							"__year__" to Env.COPYRIGHT_YEAR
-						)
-					)
-				}
-				project.copy {
-					from("${project.projectDir}/src/main") {
-						exclude("lyx/manual.lyx")
-					}
-					into(build.temporaryDir)
-				}
+
+		project.tasks.register<Copy>(PREPARE_PDF_GENERATION) {
+
+			// copy the manual with text replacements:
+			from("${project.projectDir}/src/main") {
+				include("lyx/manual.lyx").
+				filter(
+					ReplaceTokens::class, "tokens" to mapOf(
+					"__version__" to project.version,
+					"__minor_version__" to Version.parse(project.version).minorVersionString(),
+					"__identifier__" to "${Jenetics.VERSION}-$BUILD_DATE",
+					"__year__" to Env.COPYRIGHT_YEAR
+				)
+				)
 			}
+
+			// copy the rest of the files without changes:
+			from("${project.projectDir}/src/main") {
+				exclude("lyx/manual.lyx")
+			}
+
+			into(build.temporaryDir)
 		}
 
 		project.tasks.register<Lyx2PDFTask>("lyx") {

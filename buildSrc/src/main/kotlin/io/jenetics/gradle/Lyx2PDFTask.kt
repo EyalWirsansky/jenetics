@@ -71,7 +71,7 @@ abstract class Lyx2PDFTask : DefaultTask() {
 		val documentName = documentFile.name
 
 		val outputDir = pdfDir.get().getAsFile().name
-		val pdfDocName = "${documentFile.nameWithoutExtension}.pdf" // "manual.pdf"
+		val pdfDocName = "${documentFile.nameWithoutExtension}.pdf" // => "manual.pdf"
 
 		val builder = ProcessBuilder(
 			//BINARY, "-e", "pdf2", documentName
@@ -108,7 +108,7 @@ abstract class Lyx2PDFTask : DefaultTask() {
 
 
 	companion object {
-		private const val BINARY = "cp111" //"lyx"
+		private const val BINARY = "cp" //"lyx"
 
 		private fun lyxExists(): Boolean {
 			//val builder = ProcessBuilder(BINARY, "-version")
