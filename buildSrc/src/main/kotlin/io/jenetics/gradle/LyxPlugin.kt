@@ -74,7 +74,9 @@ open class LyxPlugin : Plugin<Project> {
 		}
 
 		project.tasks.register<Lyx2PDFTask>("lyx") {
-			document = project.file("${build.temporaryDir}/lyx/manual.lyx")
+			val file = project.layout.buildDirectory.file("tmp/build/lyx/manual.lyx")
+			document.set(file)
+			pdfDir.set(project.layout.buildDirectory.dir("lyx_output/pdf"))
 
 			dependsOn(PREPARE_PDF_GENERATION)
 			doLast {

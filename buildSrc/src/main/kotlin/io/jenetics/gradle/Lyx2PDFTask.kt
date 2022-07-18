@@ -21,6 +21,7 @@ package io.jenetics.gradle
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.TaskExecutionException
 import java.io.BufferedReader
@@ -28,6 +29,11 @@ import java.io.File
 import java.io.IOException
 import java.io.InputStream
 import java.io.InputStreamReader
+import org.gradle.api.provider.Property
+import org.gradle.api.file.RegularFile
+import org.gradle.api.file.Directory
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.RegularFileProperty
 
 /**
  * This tasks converts a lyx document into a PDF.
@@ -36,10 +42,13 @@ import java.io.InputStreamReader
  * @since 1.4
  * @version 6.1
  */
-open class Lyx2PDFTask : DefaultTask() {
+abstract class Lyx2PDFTask : DefaultTask() {
 
 	@get:InputFile
-	var document: File? = null
+	abstract val document: RegularFileProperty
+
+	@get:OutputDirectory
+	abstract val pdfDir: DirectoryProperty
 
 	@TaskAction
 	fun lyx2PDF() {
@@ -48,15 +57,25 @@ open class Lyx2PDFTask : DefaultTask() {
 		} else {
 			logger.lifecycle("Binary '{}' not found.", BINARY)
 			logger.lifecycle("Manual PDF has not been created.")
+			createEmptyFile()
 		}
 	}
 
+	private fun createEmptyFile() {
+		pdfDir.get().file("empty.pdf").asFile.writeText("foo")
+	}
+
 	private fun convert() {
-		val workingDir = document?.parentFile
-		val documentName = document?.name
+		val documentFile = document.get().asFile
+		val workingDir = documentFile.parentFile
+		val documentName = documentFile.name
+
+		val outputDir = pdfDir.get().getAsFile().name
+		val pdfDocName = "${documentFile.nameWithoutExtension}.pdf" // "manual.pdf"
 
 		val builder = ProcessBuilder(
-			BINARY, "-e", "pdf2", documentName
+			//BINARY, "-e", "pdf2", documentName
+			BINARY, documentName, "${outputDir}/${pdfDocName}"
 		)
 		builder.directory(workingDir)
 		builder.redirectErrorStream(true)
@@ -70,6 +89,8 @@ open class Lyx2PDFTask : DefaultTask() {
 			if (exitValue != 0) {
 				logger.lifecycle("Error while generating PDF.")
 				logger.lifecycle("Manual PDF has not been created.")
+			} else {
+				//pdfDir = File(pdfDocName)
 			}
 		} catch (e: Exception) {
 			throw TaskExecutionException(this, e)
@@ -87,10 +108,11 @@ open class Lyx2PDFTask : DefaultTask() {
 
 
 	companion object {
-		private const val BINARY = "lyx"
+		private const val BINARY = "cp111" //"lyx"
 
 		private fun lyxExists(): Boolean {
-			val builder = ProcessBuilder(BINARY, "-version")
+			//val builder = ProcessBuilder(BINARY, "-version")
+			val builder = ProcessBuilder(BINARY, "--help")
 
 			return try {
 				val process = builder.start();
