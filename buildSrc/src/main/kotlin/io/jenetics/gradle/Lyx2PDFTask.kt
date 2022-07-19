@@ -25,13 +25,9 @@ import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.TaskExecutionException
 import java.io.BufferedReader
-import java.io.File
 import java.io.IOException
 import java.io.InputStream
 import java.io.InputStreamReader
-import org.gradle.api.provider.Property
-import org.gradle.api.file.RegularFile
-import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 
@@ -70,18 +66,20 @@ abstract class Lyx2PDFTask : DefaultTask() {
 		val workingDir = documentFile.parentFile
 		val documentName = documentFile.name
 
-		val outputDir = pdfDir.get().getAsFile().name
-		val pdfDocName = "${documentFile.nameWithoutExtension}.pdf" // => "manual.pdf"
+		val pdfDir = pdfDir.get().getAsFile().absolutePath
+		val pdfDocName = "${documentFile.nameWithoutExtension}.pdf"
 
 		val builder = ProcessBuilder(
 			//BINARY, "-e", "pdf2", documentName
-			BINARY, documentName, "${outputDir}/${pdfDocName}"
+			BINARY, "${workingDir}/${documentName}", "${pdfDir}/${pdfDocName}"
 		)
 		builder.directory(workingDir)
 		builder.redirectErrorStream(true)
 		logger.debug("${workingDir}/${documentName}")
 
 		try {
+			this.pdfDir.get().getAsFile().mkdir() // create the PDF directory
+
 			val process = builder.start()
 			output(process.inputStream)
 			val exitValue = process.waitFor()
@@ -89,8 +87,6 @@ abstract class Lyx2PDFTask : DefaultTask() {
 			if (exitValue != 0) {
 				logger.lifecycle("Error while generating PDF.")
 				logger.lifecycle("Manual PDF has not been created.")
-			} else {
-				//pdfDir = File(pdfDocName)
 			}
 		} catch (e: Exception) {
 			throw TaskExecutionException(this, e)
