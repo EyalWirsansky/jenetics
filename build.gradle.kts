@@ -56,6 +56,13 @@ allprojects {
 		resolutionStrategy.preferProjectModules()
 	}
 
+	normalization {
+		runtimeClasspath {
+			metaInf {
+				ignoreAttribute("Build-Date")
+			}
+		}
+	}
 }
 
 apply("./gradle/alljavadoc.gradle")
