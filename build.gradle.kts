@@ -178,14 +178,16 @@ fun setupJavadoc(project: Project, taskName: String) {
 		doclet.docEncoding = "UTF-8"
 		doclet.charSet = "UTF-8"
 		doclet.linkSource(true)
+
+		val javadocPath = project.file("../buildSrc/resources/javadoc").path
 		doclet.linksOffline(
 				"https://docs.oracle.com/en/java/javase/17/docs/api/",
-				"${project.rootDir}/buildSrc/resources/javadoc/java.se"
+			    "$javadocPath/java.se"
 			)
 		doclet.windowTitle = "Jenetics ${project.version}"
 		doclet.docTitle = "<h1>Jenetics ${project.version}</h1>"
-		doclet.bottom = "&copy; ${Env.COPYRIGHT_YEAR} Franz Wilhelmst&ouml;tter  &nbsp;<i>(${Env.BUILD_DATE})</i>"
-		doclet.stylesheetFile = project.file("${project.rootDir}/buildSrc/resources/javadoc/stylesheet.css")
+		doclet.bottom = "&copy; ${Env.COPYRIGHT_YEAR} Franz Wilhelmst&ouml;tter"
+		doclet.stylesheetFile = project.file("$javadocPath/stylesheet.css")
 
 		doclet.addStringOption("noqualifier", "io.jenetics.internal.collection")
 		doclet.tags = listOf(

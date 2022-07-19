@@ -48,8 +48,10 @@ tasks.test { dependsOn(tasks.compileJmhJava) }
 
 tasks.javadoc {
 	val doclet = options as StandardJavadocDocletOptions
+	val javadocPath = project.file("../buildSrc/resources/javadoc").path
+
 	doclet.linksOffline(
 		"https://jenetics.io/javadoc/jenetics",
-		"${project.rootDir}/buildSrc/resources/javadoc/jenetics.base"
+		"$javadocPath/jenetics.base"
 	)
 }
