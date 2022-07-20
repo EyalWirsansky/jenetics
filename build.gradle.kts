@@ -186,11 +186,12 @@ fun setupJavadoc(project: Project, taskName: String) {
 		doclet.charSet = "UTF-8"
 		doclet.linkSource(true)
 
-		val javadocPath = project.file("../buildSrc/resources/javadoc").path
+
+		val javadocPath = project.relativePath("${project.rootDir}/buildSrc/resources/javadoc")
 		doclet.linksOffline(
-				"https://docs.oracle.com/en/java/javase/17/docs/api/",
-			    "$javadocPath/java.se"
-			)
+			"https://docs.oracle.com/en/java/javase/17/docs/api/",
+		    "$javadocPath/java.se"
+		)
 		doclet.windowTitle = "Jenetics ${project.version}"
 		doclet.docTitle = "<h1>Jenetics ${project.version}</h1>"
 		doclet.bottom = "&copy; ${Env.COPYRIGHT_YEAR} Franz Wilhelmst&ouml;tter"
